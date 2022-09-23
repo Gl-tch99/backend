@@ -111,6 +111,19 @@ router.get("/fetchdata", protect, (req, res) => {
   });
 });
 
+router.post("/search", (req, res) => {
+  console.log(req.body.data.Search);
+  User.find({ firstname: req.body.data.Search })
+    .then((data) => {
+      console.log(data);
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(401).send("Data not found.");
+    });
+});
+
 router.get("/verifytoken", (req, res) => {
   console.log(req.headers.authorization);
   let token = req.headers.authorization.split(" ")[1];
@@ -187,11 +200,12 @@ router.put("/add/:id", (req, res) => {
     });
 });
 
-router.put("/sendreq/:id", (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
+router.put("/sendreq/", (req, res) => {
+  console.log(req.body);
+  const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
   console.log(decoded);
-  User.findById(req.params.id)
+  User.findById(req.body.data.id)
     .then((data) => {
       data.friendsreq.push({
         name: decoded.user.firstname + " " + decoded.user.lastname,
@@ -200,7 +214,10 @@ router.put("/sendreq/:id", (req, res) => {
       });
       data.save((err, data) => {
         if (err) console.log(err);
-        else console.log(data);
+        else {
+          console.log(data);
+          res.status(200).send(data);
+        }
       });
     })
     .catch((err) => {
@@ -214,73 +231,12 @@ router.get("/user/:id", (req, res) => {
     else res.send(data);
   });
 });
-/* const query = User.find().where("_id").equals(req.params.id)
-    router.put('/user/:id',(req,res)=>{
-    query.exec(req,res)=>({
-          if(err) res.send("id not found")
-          else res.send(data)
-          })
-  
-      })*/
 
 router.delete("/:id", (req, res) => {
   User.findByIdAndDelete(req.params.id, (err) => {
     if (err) res.send("not deleted");
     else res.send("deleted");
   });
-
-  /* router.get('/login',(req,res)=>{
-     console.log(req.body)
-      User.findOne({email:req.body.email,password:req.body.password},(err,user)=>{
-        if(err) res.send("Incorrect Username or Password")
-        if(user)
-        {
-          console.log("req.body.User")
-          if(user.password==req.body.User.password)
-          res.send("Login Successfully"+user)
-          else
-          res.send("Incorrect Username or Password")
-        }
-     })
-    })*/
-
-  /* router.post('/signIn',(req,res)=>{
-      console.log(req.body.email)
-      User.findOne({email: req.body.email},
-         function(err,user) {
-        if (err)
-          return done(err);
-       
-        if (!user) {
-          console.log('That account does not exist!')
-          return done(null, false, req.flash('loginMessage', 'No user found.'));
-        }
-if (user.password != password) {
-          console.log('Wrong password!')
-          return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
-        }
-        return done(null, user);
-      });
-    });*/
-  /*function(req, email, password, done) {
-      User.findOne({
-          email: req.body.email
-        }, function(err,
-          user) {
-          if (err)
-            return done(err);
-         
-          if (!user) {
-            console.log('That account does not exist!')
-            return done(null, false, req.flash('loginMessage', 'No user found.'));
-          }
-  if (user.password != password) {
-            console.log('Wrong password!')
-            return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
-          }
-          return done(null, user);
-        });
-      }));*/
 });
 
 module.exports = router;

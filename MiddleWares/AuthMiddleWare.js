@@ -3,7 +3,9 @@ const User = require("../models/user");
 const asyncHandler = require("express-async-handler");
 
 const protect = (req, res, next) => {
-  token = req.headers.authorization;
+  token = req.body.headers.authorization;
+  console.log(req.body);
+  if (!token) console.log("no token");
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
@@ -12,16 +14,17 @@ const protect = (req, res, next) => {
       console.log("MiddleWare");
       let token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, "abc123");
-      User.findOne({ email: decoded.email })
-        .then((user) => {
-          req.user = user;
-        })
-        .catch((error) => {
-          console.log(error);
-          // res.status(401)
-          res.status(401).send("Invalid Token");
-        });
-      next();
+      // User.findOne({ email: decoded.user.email })
+      //   .then((user) => {
+      //     console.log(user);
+      //     req.user = user;
+      //   })
+      //   .catch((error) => {
+      //     console.log(error);
+      //     // res.status(401)
+      //     res.status(401).send("Invalid Token");
+      //   });
+      req.next();
     } catch (error) {
       res.status(401).send("Not Authorized");
     }
