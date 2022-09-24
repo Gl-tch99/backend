@@ -35,7 +35,7 @@ const Project = new mongoose.Schema({
   },
 
   technologies: {
-    type: String,
+    type: [],
     required: [true],
   },
 
@@ -48,6 +48,7 @@ const Project = new mongoose.Schema({
   status: {
     type: String,
     required: [true, "Please enter valid status"],
+    default: "Working",
   },
 
   leaderid: {
@@ -58,7 +59,7 @@ const Project = new mongoose.Schema({
   },
 
   teamusers: {
-    type: String,
+    type: [{}],
   },
 });
 

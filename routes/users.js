@@ -200,22 +200,28 @@ router.put("/add/:id", (req, res) => {
     });
 });
 
-router.put("/sendreq/", (req, res) => {
-  console.log(req.body);
+router.put("/sendreq", (req, res) => {
+  // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
-  console.log(decoded);
-  User.findById(req.body.data.id)
+  // console.log(decoded);
+  // console.log(req.body.data.friend);
+  User.findById(req.body.data.friend._id)
     .then((data) => {
-      data.friendsreq.push({
-        name: decoded.user.firstname + " " + decoded.user.lastname,
+      const friendreq = {
+        firstname: decoded.user.firstname,
+        lastname: decoded.user.lastname,
+        skillsets: decoded.user.skillsets,
+        email: decoded.user.email,
         userid: decoded.user.userid,
         Accepted: false,
-      });
+      };
+      console.log(friendreq);
+      data.friendsreq.push(friendreq);
       data.save((err, data) => {
         if (err) console.log(err);
         else {
-          console.log(data);
+          // console.log(data);
           res.status(200).send(data);
         }
       });
@@ -223,6 +229,79 @@ router.put("/sendreq/", (req, res) => {
     .catch((err) => {
       console.log("not sent" + err);
     });
+});
+
+router.put("/acceptreq", (req, res) => {
+  // console.log(req.body);
+  const token = req.body.headers.authorization.split(" ")[1];
+  const decoded = jwt.decode(token, "abc123");
+  console.log(req.body.data.frnds);
+  const user = new User(req.body.data.user);
+
+  User.findOneAndUpdate(
+    { userid: user.userid },
+    {
+      $set: { friends: req.body.data.frnds },
+      $set: { friendsreq: req.body.data.frndsreq },
+    }
+  )
+    .then((data) => {
+      console.log(data);
+      res.status(201).json({
+        ...data,
+        token: generateToken(data, false),
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+  // console.log(data);
+
+  // User.findById(decoded._id)
+  //   .then((data) => {
+  //     User.find({ userid: req.body.data.id })
+  //       .then((doc) => {
+  //         data.friends.push({
+  //           firstname: doc.firstname,
+  //           lastname: doc.lastname,
+  //           skillsets: doc.skillsets,
+  //           email: doc.email,
+  //           userid: doc.userid,
+  //         });
+  //         data.friendsreq.pull({
+  //           userid: doc.userid,
+  //         });
+  //         data.save().then((data) => {
+  //           console.log("req Accepted" + data);
+  //           doc.friends.push({
+  //             firstname: data.firstname,
+  //             lastname: data.lastname,
+  //             skillsets: data.skillsets,
+  //             email: data.email,
+  //             userid: data.userid,
+  //           });
+  //           doc.friendsreq.pull({
+  //             userid: data.userid,
+  //           });
+  //           doc
+  //             .save()
+  //             .then(() => {
+  //               console.log("Request Accepted");
+  //               res.status(200).send("Request Accepted");
+  //             })
+  //             .catch((err) => {
+  //               console.log("error" + err);
+  //             });
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         console.log("error at find by id" + err);
+  //       });
+  //   })
+  //   .catch((err) => {
+  //     console.log("not sent" + err);
+  //   });
 });
 
 router.get("/user/:id", (req, res) => {

@@ -46,7 +46,26 @@ const User = new mongoose.Schema({
   },
 
   friends: {
-    type: [],
+    type: [
+      {
+        firstname: {
+          type: String,
+        },
+        lastname: {
+          type: String,
+        },
+        email: {
+          type: String,
+        },
+        skillsets: {
+          type: [],
+        },
+        Accepted: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     required: [false, "Please enter your name"],
   },
 
@@ -75,11 +94,17 @@ const User = new mongoose.Schema({
   friendsreq: {
     type: [
       {
-        name: {
+        firstname: {
           type: String,
         },
-        userid: {
+        lastname: {
           type: String,
+        },
+        email: {
+          type: String,
+        },
+        skillsets: {
+          type: [],
         },
         Accepted: {
           type: Boolean,
