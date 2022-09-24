@@ -164,6 +164,8 @@ router.put("/update/:id", (req, res) => {
   });
 });
 
+router.put("/addproj", (req, res) => {});
+
 router.put("/add/:id", (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
@@ -231,7 +233,7 @@ router.put("/sendreq", (req, res) => {
     });
 });
 
-router.put("/acceptreq", (req, res) => {
+router.patch("/acceptreq", (req, res) => {
   // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
