@@ -5,7 +5,7 @@ var router = express.Router();
 const User = require("../models/user");
 const Project = require("../models/project");
 const jwt = require("jsonwebtoken");
-const { protect } = require("../MiddleWares/AuthMiddleWare");
+const { protect, getprotect } = require("../MiddleWares/AuthMiddleWare");
 const bcrypt = require("bcrypt");
 const UUID = require("uuid");
 const { $where } = require("../models/user");
@@ -90,7 +90,17 @@ router.post("/login", (req, res) => {
           console.log("Login Successfull.....");
           res.status(200).send({
             ...data,
-            token: generateToken(data, rememberMe),
+            token: generateToken(
+              {
+                _id: data._id,
+                userid: data.userid,
+                firstname: data.firstname,
+                lastname: data.lastname,
+                email: data.email,
+                mobile: data.mobile,
+              },
+              rememberMe
+            ),
           });
         } else {
           console.log("Login Failed...");
@@ -161,7 +171,17 @@ router.put("/joinproj", (req, res) => {
       console.log(data);
       res.status(200).send({
         ...data,
-        token: generateToken(data, false),
+        token: generateToken(
+          {
+            _id: data._id,
+            userid: data.userid,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            email: data.email,
+            mobile: data.mobile,
+          },
+          false
+        ),
       });
     }
   });
@@ -341,5 +361,18 @@ router.delete("/:id", (req, res) => {
     else res.send("deleted");
   });
 });
+
+// router.post("/refreshtoken", getprotect, (req, res) => {
+//   const token = req.body.headers.authorization.split(" ")[1];
+//   const tokendata = jwt.decode(token);
+//   const data = tokendata.user;
+//   console.log(data);
+//   User.findOne({ userid: data.userid }).then((data) => {
+//     res.status(201).json({
+//       data,
+//       token: generateToken(data, false),
+//     });
+//   });
+// });
 
 module.exports = router;
