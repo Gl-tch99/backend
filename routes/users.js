@@ -1,9 +1,9 @@
 var express = require("express");
 const { response } = require("../app");
 const abc = require("../models/abc");
-const user = require("../models/user");
 var router = express.Router();
 const User = require("../models/user");
+const Project = require("../models/project");
 const jwt = require("jsonwebtoken");
 const { protect } = require("../MiddleWares/AuthMiddleWare");
 const bcrypt = require("bcrypt");
@@ -141,6 +141,48 @@ router.get("/verifytoken", (req, res) => {
   } catch {}
 });
 
+router.put("/joinproj", (req, res) => {
+  const token = req.body.headers.authorization.split(" ")[1];
+  console.log(token);
+  const decoded = jwt.decode(token, "abc123");
+  const tokendata = decoded.user;
+  const project = req.body.data.project;
+  console.log(tokendata);
+  User.findOneAndUpdate(
+    { userid: tokendata.userid },
+    {
+      $push: { projects: project },
+    }
+  ).exec((err, data) => {
+    if (err) {
+      console.log(err);
+      res.status(401).send(err);
+    } else {
+      console.log(data);
+      res.status(200).send({
+        ...data,
+        token: generateToken(data, false),
+      });
+    }
+  });
+  Project.findOneAndUpdate(
+    {
+      projectid: project.projectid,
+    },
+    {
+      $push: {
+        teamusers: {
+          firstname: tokendata.firstname,
+          lastname: tokendata.lastname,
+          skillsets: tokendata.skillsets,
+          email: tokendata.email,
+          userid: tokendata.userid,
+        },
+      },
+    }
+  ).exec();
+});
+
 router.put("/update/:id", (req, res) => {
   console.log(req.params.id);
   User.findById(req.params.id, (err, data) => {
@@ -164,42 +206,22 @@ router.put("/update/:id", (req, res) => {
   });
 });
 
-router.put("/addproj", (req, res) => {});
-
 router.put("/add/:id", (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
   const tokendata = decoded.user;
+  const project = req.body.data.project;
   console.log(tokendata);
-  User.findById(req.params.id)
-    .then((data) => {
-      User.findById(tokendata._id)
-        .then((user) => {
-          user.friends.push(data);
-          // data.friends.push(user);
-          // data.friendsreq.pull({
-          //   $where: { name: user.firstname + " " + user.lastname },
-          // });
-          user.friendsreq.pull({
-            $where: { name: data.firstname + "" + data.lastname },
-          });
-          user.save((err, doc) => {
-            if (err) console.log(err);
-            else console.log(doc);
-          });
-          // data.save((err, doc) => {
-          //   if (err) console.log(err);
-          //   else console.log(doc);
-          // });
-          console.log("friend added");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  User.findOneAndUpdate(
+    { userid: tokendata.userid },
+    {
+      $push: { projects: project },
+    },
+    (err, data) => {
+      if (err) console.log(err);
+      else console.log(data);
+    }
+  );
 });
 
 router.put("/sendreq", (req, res) => {
@@ -233,7 +255,7 @@ router.put("/sendreq", (req, res) => {
     });
 });
 
-router.patch("/acceptreq", (req, res) => {
+router.put("/acceptreq", (req, res) => {
   // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");

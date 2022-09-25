@@ -60,6 +60,13 @@ router.get("/fetchdata", (req, res) => {
   });
 });
 
+router.get("/fetchwrokingproj", (req, res) => {
+  Project.find({ status: "Working" }, (err, data) => {
+    if (err) throw err;
+    res.send(data);
+  });
+});
+
 router.put("/update/:id", (req, res) => {
   Project.findById(req.params.id, (err, data) => {
     if (err) throw err;
@@ -71,6 +78,32 @@ router.put("/update/:id", (req, res) => {
       else res.send("data updated");
     });
   });
+});
+
+const generateToken = (user, rememberMe) => {
+  const secretKey = "abc123";
+  if (rememberMe) return jwt.sign({ user }, secretKey, { expiresIn: "30d" });
+  else return jwt.sign({ user }, secretKey, { expiresIn: "6h" });
+};
+
+router.put("/update", (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.decode(token, "abc123");
+  const tokendata = decoded.user;
+  Project.findByIdAndUpdate(
+    tokendata._id,
+    { $set: { $push: { projects: req.body.data.project } } },
+    (err, data) => {
+      if (err) throw err;
+      else {
+        console.log(data);
+        res.status(200).send({
+          ...data,
+          token: generateToken(data, false),
+        });
+      }
+    }
+  );
 });
 
 router.delete("/:id", (req, res) => {
