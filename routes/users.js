@@ -204,26 +204,48 @@ router.put("/joinproj", (req, res) => {
 });
 
 router.put("/update/:id", (req, res) => {
-  console.log(req.params.id);
-  User.findById(req.params.id, (err, data) => {
-    if (err) throw err;
-    console.log(data);
-    data.firstname = req.body.UpdateUser.firstname;
-    data.lastname = req.body.UpdateUser.lastname;
-    data.email = req.body.UpdateUser.email;
-    data.password = req.body.UpdateUser.password;
-    data.mobile = req.body.UpdateUser.mobile;
-    data.projects = req.body.UpdateUser.projects;
-    data.skillsets = req.body.UpdateUser.skillsets;
-    data.friends = req.body.UpdateUser.friends;
-    data.friendsreq = req.body.UpdateUser.friendsreq;
-    data.experience = req.body.UpdateUser.experience;
-    data.description = req.body.UpdateUser.description;
-    data.save((err) => {
-      if (err) res.send("not updated");
-      else res.send("data updated");
+  console.log(req.headers);
+  const password = bcrypt.hashSync(req.body.data.EditedUser.password, 10);
+  console.log(req.body);
+  User.findOneAndUpdate(
+    { userid: req.params.id },
+    {
+      $set: {
+        firstname: req.body.data.EditedUser.firstname,
+        lastname: req.body.data.EditedUser.lastname,
+        email: req.body.data.EditedUser.email,
+        password: password,
+        mobile: req.body.data.EditedUser.mobile,
+        projects: req.body.data.EditedUser.projects,
+        skillsets: req.body.data.EditedUser.skillsets,
+        friends: req.body.data.EditedUser.friends,
+        friendsreq: req.body.data.EditedUser.friendsreq,
+        experience: req.body.data.EditedUser.experience,
+        description: req.body.data.EditedUser.description,
+      },
+    }
+  )
+    .exec()
+    .then((data) => {
+      console.log(data);
+      res.status(200).send({
+        ...data,
+        token: generateToken(
+          {
+            _id: data._id,
+            userid: data.userid,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            email: data.email,
+            mobile: data.mobile,
+          },
+          false
+        ),
+      });
+    })
+    .catch((err) => {
+      console.log(err);
     });
-  });
 });
 
 router.put("/add/:id", (req, res) => {
