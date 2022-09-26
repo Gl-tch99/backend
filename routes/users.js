@@ -301,16 +301,25 @@ router.put("/acceptreq", (req, res) => {
   // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
-  console.log(req.body.data.frnds);
-  const user = new User(req.body.data.user);
-
+  const tokendata = decoded.user;
+  console.log(tokendata);
+  console.log(req.body.data.friend);
   User.findOneAndUpdate(
-    { userid: user.userid },
+    { userid: tokendata.userid },
     {
-      $set: { friends: req.body.data.frnds },
-      $set: { friendsreq: req.body.data.frndsreq },
+      $push: {
+        friends: {
+          firstname: req.body.data.friend.firstname,
+          lastname: req.body.data.friend.lastname,
+          skillsets: req.body.data.friend.skillsets,
+          email: req.body.data.friend.email,
+          userid: req.body.data.friend.userid,
+        },
+      },
+      $pull: { friendsreq: { userid: req.body.friend.userid } },
     }
   )
+    .exec()
     .then((data) => {
       console.log(data);
       res.status(201).json({
