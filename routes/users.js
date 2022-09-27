@@ -40,7 +40,17 @@ router.post("/submit", (req, res) => {
           console.log(data);
           res.status(201).json({
             ...data,
-            token: generateToken(u1, false),
+            token: generateToken(
+              {
+                _id: u1._id,
+                userid: u1.userid,
+                firstname: u1.firstname,
+                lastname: u1.lastname,
+                email: u1.email,
+                mobile: u1.mobile,
+              },
+              false
+            ),
           });
         }
       });
@@ -316,7 +326,7 @@ router.put("/acceptreq", (req, res) => {
           userid: req.body.data.friend.userid,
         },
       },
-      $pull: { friendsreq: { userid: req.body.friend.userid } },
+      // $pull: { friendsreq: { userid: req.body.friend.userid } },
     }
   )
     .exec()
@@ -324,8 +334,54 @@ router.put("/acceptreq", (req, res) => {
       console.log(data);
       res.status(201).json({
         ...data,
-        token: generateToken(data, false),
+        token: generateToken(
+          {
+            _id: data._id,
+            userid: data.userid,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            email: data.email,
+            mobile: data.mobile,
+          },
+          false
+        ),
       });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  User.findOneAndUpdate(
+    { userid: tokendata.userid },
+    {
+      // $push: {
+      //   friends: {
+      //     firstname: req.body.data.friend.firstname,
+      //     lastname: req.body.data.friend.lastname,
+      //     skillsets: req.body.data.friend.skillsets,
+      //     email: req.body.data.friend.email,
+      //     userid: req.body.data.friend.userid,
+      //   },
+      // },
+      $pull: { friendsreq: { userid: req.body.friend.userid } },
+    }
+  )
+    .exec()
+    .then((data) => {
+      console.log(data);
+      // res.status(201).json({
+      //   ...data,
+      //   token: generateToken(
+      //     {
+      //       _id: data._id,
+      //       userid: data.userid,
+      //       firstname: data.firstname,
+      //       lastname: data.lastname,
+      //       email: data.email,
+      //       mobile: data.mobile,
+      //     },
+      //     false
+      //   ),
+      // });
     })
     .catch((err) => {
       console.log(err);
