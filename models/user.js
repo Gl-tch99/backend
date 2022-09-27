@@ -48,6 +48,9 @@ const User = new mongoose.Schema({
   friends: {
     type: [
       {
+        userid: {
+          type: String,
+        },
         firstname: {
           type: String,
         },
@@ -94,6 +97,9 @@ const User = new mongoose.Schema({
   friendsreq: {
     type: [
       {
+        userid: {
+          type: String,
+        },
         firstname: {
           type: String,
         },

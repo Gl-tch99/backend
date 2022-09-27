@@ -158,7 +158,9 @@ router.get("/verifytoken", (req, res) => {
       .catch((err) => {
         res.status(400).send("User not found." + err);
       });
-  } catch {}
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 router.put("/joinproj", (req, res) => {
@@ -308,12 +310,9 @@ router.put("/sendreq", (req, res) => {
 });
 
 router.put("/acceptreq", (req, res) => {
-  // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
   const tokendata = decoded.user;
-  console.log(tokendata);
-  console.log(req.body.data.friend);
   User.findOneAndUpdate(
     { userid: tokendata.userid },
     {
@@ -326,12 +325,11 @@ router.put("/acceptreq", (req, res) => {
           userid: req.body.data.friend.userid,
         },
       },
-      // $pull: { friendsreq: { userid: req.body.friend.userid } },
     }
   )
     .exec()
     .then((data) => {
-      console.log(data);
+      // console.log(data);
       res.status(201).json({
         ...data,
         token: generateToken(
@@ -350,89 +348,75 @@ router.put("/acceptreq", (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+});
+
+router.put("/addfriend", (req, res) => {
+  const token = req.body.headers.authorization.split(" ")[1];
+  const decoded = jwt.decode(token, "abc123");
+  const tokendata = decoded.user;
   User.findOneAndUpdate(
-    { userid: tokendata.userid },
+    { userid: req.body.data.friend.userid },
     {
-      // $push: {
-      //   friends: {
-      //     firstname: req.body.data.friend.firstname,
-      //     lastname: req.body.data.friend.lastname,
-      //     skillsets: req.body.data.friend.skillsets,
-      //     email: req.body.data.friend.email,
-      //     userid: req.body.data.friend.userid,
-      //   },
-      // },
-      $pull: { friendsreq: { userid: req.body.friend.userid } },
+      $push: {
+        friends: {
+          firstname: tokendata.firstname,
+          lastname: tokendata.lastname,
+          skillsets: tokendata.skillsets,
+          email: tokendata.email,
+          userid: tokendata.userid,
+        },
+      },
     }
   )
     .exec()
     .then((data) => {
-      console.log(data);
-      // res.status(201).json({
-      //   ...data,
-      //   token: generateToken(
-      //     {
-      //       _id: data._id,
-      //       userid: data.userid,
-      //       firstname: data.firstname,
-      //       lastname: data.lastname,
-      //       email: data.email,
-      //       mobile: data.mobile,
-      //     },
-      //     false
-      //   ),
-      // });
+      // console.log(data);
+      res.status(201).send("Friend Added");
     })
     .catch((err) => {
       console.log(err);
     });
+});
 
-  // console.log(data);
-
-  // User.findById(decoded._id)
-  //   .then((data) => {
-  //     User.find({ userid: req.body.data.id })
-  //       .then((doc) => {
-  //         data.friends.push({
-  //           firstname: doc.firstname,
-  //           lastname: doc.lastname,
-  //           skillsets: doc.skillsets,
-  //           email: doc.email,
-  //           userid: doc.userid,
-  //         });
-  //         data.friendsreq.pull({
-  //           userid: doc.userid,
-  //         });
-  //         data.save().then((data) => {
-  //           console.log("req Accepted" + data);
-  //           doc.friends.push({
-  //             firstname: data.firstname,
-  //             lastname: data.lastname,
-  //             skillsets: data.skillsets,
-  //             email: data.email,
-  //             userid: data.userid,
-  //           });
-  //           doc.friendsreq.pull({
-  //             userid: data.userid,
-  //           });
-  //           doc
-  //             .save()
-  //             .then(() => {
-  //               console.log("Request Accepted");
-  //               res.status(200).send("Request Accepted");
-  //             })
-  //             .catch((err) => {
-  //               console.log("error" + err);
-  //             });
-  //         });
-  //       })
-  //       .catch((err) => {
-  //         console.log("error at find by id" + err);
-  //       });
-  //   })
-  //   .catch((err) => {
-  //     console.log("not sent" + err);
-  //   });
+router.put("/rejectreq", (req, res) => {
+  console.log(req.body);
+  const token = req.body.headers.authorization.split(" ")[1];
+  const decoded = jwt.decode(token, "abc123");
+  const tokendata = decoded.user;
+  // console.log(tokendata);
+  const friend = req.body.data.friend.userid;
+  console.log(decoded);
+  console.log(req.body.data.friend.userid);
+  console.log(tokendata.userid);
+  User.findOneAndUpdate(
+    { userid: tokendata.userid },
+    {
+      $pull: {
+        friendsreq: { userid: req.body.data.friend.userid },
+      },
+    }
+  )
+    .exec()
+    .then((data) => {
+      // console.log(data);
+      res.status(201).json({
+        ...data,
+        token: generateToken(
+          {
+            _id: data._id,
+            userid: data.userid,
+            firstname: data.firstname,
+            lastname: data.lastname,
+            email: data.email,
+            mobile: data.mobile,
+          },
+          false
+        ),
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 router.get("/user/:id", (req, res) => {
