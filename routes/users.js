@@ -48,6 +48,7 @@ router.post("/submit", (req, res) => {
                 lastname: u1.lastname,
                 email: u1.email,
                 mobile: u1.mobile,
+                skillsets: u1.skillsets,
               },
               false
             ),
@@ -108,6 +109,7 @@ router.post("/login", (req, res) => {
                 lastname: data.lastname,
                 email: data.email,
                 mobile: data.mobile,
+                skillsets: data.skillsets,
               },
               rememberMe
             ),
@@ -191,6 +193,7 @@ router.put("/joinproj", (req, res) => {
             lastname: data.lastname,
             email: data.email,
             mobile: data.mobile,
+            skillsets: data.skillsets,
           },
           false
         ),
@@ -250,6 +253,7 @@ router.put("/update/:id", (req, res) => {
             lastname: data.lastname,
             email: data.email,
             mobile: data.mobile,
+            skillsets: data.skillsets,
           },
           false
         ),
@@ -279,11 +283,8 @@ router.put("/add/:id", (req, res) => {
 });
 
 router.put("/sendreq", (req, res) => {
-  // console.log(req.body);
   const token = req.body.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
-  // console.log(decoded);
-  // console.log(req.body.data.friend);
   User.findById(req.body.data.friend._id)
     .then((data) => {
       const friendreq = {
@@ -294,7 +295,7 @@ router.put("/sendreq", (req, res) => {
         userid: decoded.user.userid,
         Accepted: false,
       };
-      console.log(friendreq);
+      console.log(decoded.user);
       data.friendsreq.push(friendreq);
       data.save((err, data) => {
         if (err) console.log(err);
@@ -340,6 +341,7 @@ router.put("/acceptreq", (req, res) => {
             lastname: data.lastname,
             email: data.email,
             mobile: data.mobile,
+            skillsets: data.skillsets,
           },
           false
         ),
@@ -409,6 +411,7 @@ router.put("/rejectreq", (req, res) => {
             lastname: data.lastname,
             email: data.email,
             mobile: data.mobile,
+            skillsets: data.skillsets,
           },
           false
         ),
@@ -432,18 +435,5 @@ router.delete("/:id", (req, res) => {
     else res.send("deleted");
   });
 });
-
-// router.post("/refreshtoken", getprotect, (req, res) => {
-//   const token = req.body.headers.authorization.split(" ")[1];
-//   const tokendata = jwt.decode(token);
-//   const data = tokendata.user;
-//   console.log(data);
-//   User.findOne({ userid: data.userid }).then((data) => {
-//     res.status(201).json({
-//       data,
-//       token: generateToken(data, false),
-//     });
-//   });
-// });
 
 module.exports = router;

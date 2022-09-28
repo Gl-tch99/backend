@@ -38,13 +38,6 @@ router.post("/submit", (req, res) => {
       console.log("Error during record insertion : " + err);
       res.status(401).send(err);
     });
-  //   User.findOne({userid:})
-  /*p1.save((err)=>{
-    if(err) res.sendStatus(400)
-    else
- p1.save()
-    res.send("data inserted successfully")
- })*/
 });
 
 const generateUUID = () => {
@@ -105,6 +98,25 @@ router.put("/update", (req, res) => {
     }
   );
 });
+// router.put("/changestatus", (req, res) => {
+//   const token = req.headers.authorization.split(" ")[1];
+//   const decoded = jwt.decode(token, "abc123");
+//   const tokendata = decoded.user;
+//   Project.findByIdAndUpdate(
+//     tokendata._id,
+//     { $set: { projects: value } },
+//     (err, data) => {
+//       if (err) throw err;
+//       else {
+//         console.log(data);
+//         res.status(200).send({
+//           ...data,
+//           token: generateToken(data, false),
+//         });
+//       }
+//     }
+//   );
+// });
 
 router.delete("/:id", (req, res) => {
   Project.findByIdAndDelete(req.params.id, (err) => {
