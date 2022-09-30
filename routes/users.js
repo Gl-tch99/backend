@@ -264,6 +264,32 @@ router.put("/update/:id", (req, res) => {
     });
 });
 
+router.put("/changeprojstatus", (req, res) => {
+  console.log(req.body);
+  const token = req.body.headers.authorization.split(" ")[1];
+  const decoded = jwt.decode(token, "abc123");
+  const tokendata = decoded.user;
+  const proj = req.body.data.project;
+  User.findByIdAndUpdate(
+    tokendata._id,
+    { $set: { "projects.$[el].status": req.body.data.value } },
+    {
+      arrayFilters: [{ "el.projectid": proj.projectid }],
+      new: true,
+    },
+    (err, data) => {
+      if (err) throw err;
+      else {
+        console.log(data);
+        res.status(200).send({
+          ...data,
+          // token: generateToken(data, false),
+        });
+      }
+    }
+  );
+});
+
 router.put("/add/:id", (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.decode(token, "abc123");
