@@ -77,7 +77,7 @@ router.post("/login", (req, res) => {
   var user = req.body.LoginUser;
   const rememberMe = user.rememberMe;
   console.log(rememberMe);
-  console.log(user);
+  // console.log(user);
   User.findOne({ email: user.email })
     .select({
       userid: 1,
@@ -147,14 +147,14 @@ router.post("/search", (req, res) => {
 });
 
 router.get("/verifytoken", (req, res) => {
-  console.log(req.headers.authorization);
+  // console.log(req.headers.authorization);
   let token = req.headers.authorization.split(" ")[1];
   try {
     const decoded = jwt.verify(token, "abc123");
-    console.log(decoded);
+    // console.log(decoded);
     User.findOne({ userid: decoded.user.userid })
       .then((data) => {
-        console.log(data);
+        // console.log(data);
         res.send(data);
       })
       .catch((err) => {
