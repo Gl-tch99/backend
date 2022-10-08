@@ -40,6 +40,19 @@ router.post("/submit", (req, res) => {
     });
 });
 
+router.post("/search", (req, res) => {
+  console.log(req.body.data.Search);
+  Project.find({ name: req.body.data.Search })
+    .then((data) => {
+      console.log(data);
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.send(401).send("Data not found.");
+    });
+});
+
 const generateUUID = () => {
   const uuid = UUID.v4();
 
